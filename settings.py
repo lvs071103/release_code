@@ -26,7 +26,7 @@ platform_list = [
         },
         {
             'server_id': 3,
-            'connect_params': {'hostname': '10.16.1.186',
+            'connect_params': {'hostname': '60.191.239.212',
                                'username': 'root',
                                'password': '?root?',
                                'port': 22,
