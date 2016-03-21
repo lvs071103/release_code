@@ -208,7 +208,7 @@ class ReleaseCode():
                                 number += 1
                     except Exception:
                         print "%s is not exsits." % fname
-            print "md5sum check OK number: %d" % number
+            print "The number of md5sum check is OK: %d" % number
             sftp.close()
 
         except Exception as e:
