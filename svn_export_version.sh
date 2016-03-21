@@ -2,9 +2,9 @@
 #Filename: svn_full_version.sh
 
 EXPORT_PATH="./code/export/"
-SVN_USER="jack"
-SVN_PASS="LVS@98186"
-SVN_URL="https://192.168.1.214/leshu-svn/yunwei/"
+SVN_USER="test"
+SVN_PASS="test"
+SVN_URL="https://192.168.1.214/xxxx/yunwei/"
 VERSION=$1
 
 svn export --force --non-interactive --trust-server-cert --username ${SVN_USER} --password ${SVN_PASS} ${SVN_URL} ${EXPORT_PATH}/${VERSION} 2>&1>/dev/null
