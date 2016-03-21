@@ -2,6 +2,10 @@
 # Filename: get_patch_subdir.py
 # coding: utf8
 
+#!/usr/bin/python
+# Filename: get_patch_subdir.py
+# coding: utf8
+
 import subprocess
 
 

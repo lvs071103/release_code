@@ -7,7 +7,7 @@ from resource_release import *
 from call_bash import *
 from display_format import *
 from get_patch_subdir import *
-import sys
+
 
 class main():
 
@@ -28,18 +28,35 @@ class main():
                 platform_list[line]['connect_params']['release_path']
             )
         print DisplayFormat().display_line()
-
-    def showmenu(self):
+        
+    def select_server(self):
+        prompt = """输入上述表中服务器id: """
+        while True:
+            while True:
+                try:
+                    choice = int(raw_input(prompt))
+                except (EOFError, KeyboardInterrupt):
+                    break
+                id_list = []
+                for item in range(len(platform_list)):
+                    id_list.append(platform_list[item]['server_id'])
+                if choice not in id_list:
+                    print '你输入的id不存在，看清楚撒... try again'
+                else:
+                    for item in range(len(platform_list)):
+                        if platform_list[item]['server_id'] == choice:
+                            server_connect_info = platform_list[item]['connect_params']
+                            return server_connect_info
+    def select_type(self, **server_connect_info):
         prompt = """
         (A)全量更新(上传至部署目录)
         (B)差异更新(上传补丁至部署目录)
-        (C)校验MD5(全目录校验(更新最新代码至本地export目录,此目录与服务器对应版本目录对比操作,不对比补丁包目录),正确无误后，方可发布操作)
-        (D)发布操作(创建软链至发布目录)
+        (C)校验MD5(本地./code/export/版本目录与远程部署目录进行比对,比对后,可发布操作)
+        (D)发布操作(创建软链部署目录至发布目录)
         (E)版本回退(删除现有软链,选择先以版本创建软链至发布目录)
         (F)执行命令
         (Q)退出
         Enter choice: """
-
         while True:
             while True:
                 try:
@@ -58,27 +75,19 @@ class main():
 
             if choice == 'a':
                 try:
-                    select_id = int(raw_input("选择更进行更新的服务器: "))
-                    for line in range(len(platform_list)):
-                        if platform_list[line]['server_id'] == select_id:
-                            server_connect_info  = platform_list[line]['connect_params']
-                    release_version = raw_input("定义一个版本号或者补丁号，远程服务器将以目录的形式存在,比如输入v1,远程服务器上将创建远程地址加v1[ /home/deploy/v1 ]: ")
+                    release_version = raw_input("输入一个版本号，远程服务器将创建以这个版本号命名的目录: ")
                     server_connect_info['release_version'] = release_version
                     command = "bash svn_export_version.sh %s" % server_connect_info['release_version']
                     CallBash(command).bash_process()
                     ssh_handle = ReleaseCode(**server_connect_info)
                     ssh_handle.check_sshconnect()
-                    ssh_handle.full_upload()    
+                    ssh_handle.full_upload()
                 except (KeyboardInterrupt, EOFError):
                     break
 
             if choice == 'b':
                 try:
-                    select_id = int(raw_input("选择更进行更新的服务器: "))
-                    for line in range(len(platform_list)):
-                        if platform_list[line]['server_id'] == select_id:
-                            server_connect_info  = platform_list[line]['connect_params']
-                    release_version = raw_input("定义一个版本号或者补丁号，远程服务器将以目录的形式存在,比如输入v1,远程服务器上将创建远程地址加v1[ /home/deploy/v1 ]: ")
+                    release_version = raw_input("输入一个版本号，远程服务器将创建以这个版本号命名的目录: ")
                     server_connect_info['release_version'] = release_version
                     command = "bash svn_diff_version.sh"
                     CallBash(command).bash_process()
@@ -96,13 +105,13 @@ class main():
 
             if choice == 'c':
                 try:
-                    select_id = int(raw_input("选择需要校验的服务器: "))
-                    for line in range(len(platform_list)):
-                        if platform_list[line]['server_id'] == select_id:
-                             server_connect_info  = platform_list[line]['connect_params']
-                    release_version = raw_input("输入要比对的目录，比如v1[ /home/deploy/v1 ]: ")
+                    
+                    release_version = raw_input("输入要比对的目录，比如v1, 本地v1将拉取svn最新代码,与远程v1目录进行md5对比: ")
                     server_connect_info['release_version'] = release_version
                     ssh_handle = ReleaseCode(**server_connect_info)
+                    command = "bash svn_export_version.sh %s" % server_connect_info['release_version']
+                    CallBash(command).bash_process()
+                    print "本地%s已更新" % server_connect_info['release_version']
                     ssh_handle.check_sshconnect()
                     ssh_handle.check_md5()
                 except(KeyboardInterrupt, EOFError):
@@ -110,44 +119,32 @@ class main():
 
             if choice == 'd':
                 try:
-                    select_id = int(raw_input("选择发布服务器: "))
-                    for line in range(len(platform_list)):
-                        if platform_list[line]['server_id'] == select_id:
-                            server_connect_info  = platform_list[line]['connect_params']
                     ssh_handle = ReleaseCode(**server_connect_info)
                     ssh_handle.check_sshconnect()
                     ssh_handle.list_last_version()
-                    release_version = raw_input("输入已部署的版本号，比如v1[ /home/deploy/v1 ]: ")
+                    release_version = raw_input("输入上面显示版本号, 系统将远程部署目录/版本号和发布目录/stable建立软链接: ")
                     server_connect_info['release_version'] = release_version
                     ssh_handle = ReleaseCode(**server_connect_info)
                     ssh_handle.check_sshconnect()
                     ssh_handle.release_symlink()
                 except(KeyboardInterrupt, EOFError):
                     break
-           
+
             if choice == 'e':
                 try:
-                    select_id = int(raw_input("选择回滚服务器: "))
-                    for line in range(len(platform_list)):
-                        if platform_list[line]['server_id'] == select_id:
-                            server_connect_info  = platform_list[line]['connect_params']
                     ssh_handle = ReleaseCode(**server_connect_info)
                     ssh_handle.check_sshconnect()
                     ssh_handle.list_last_version()
-                    server_connect_info['last_version'] = raw_input("选择先前的一个版本,进行回滚操作: ")
+                    server_connect_info['last_version'] = raw_input("输入上面显示的任一版本, 进行回滚操作: ")
                     ssh_handle = ReleaseCode(**server_connect_info)
                     ssh_handle.check_sshconnect()
-                    ssh_handle.rollback()  
+                    ssh_handle.rollback()
                 except(KeyboardInterrupt, EOFError):
                    break
 
             if choice == 'f':
                 try:
-                    select_id = int(raw_input("选择服务器: "))
-                    for line in range(len(platform_list)):
-                        if platform_list[line]['server_id'] == select_id:
-                            server_connect_info  = platform_list[line]['connect_params']
-                    server_connect_info['command'] = raw_input("输入要执行的命令如[ /etc/init.d/php restart ]: ")
+                    server_connect_info['command'] = raw_input("输入要执行的命令,远程服务器将运行这条命令(比如hostname): ")
                     ssh_handle = ReleaseCode(**server_connect_info)
                     ssh_handle.check_sshconnect()
                     ssh_handle.run_command()
@@ -156,4 +153,5 @@ class main():
 
 if __name__ == '__main__':
     main().dispaly_server_list()
-    main().showmenu()
+    server_connect_info = main().select_server()
+    main().select_type(**server_connect_info)

@@ -187,13 +187,13 @@ class ReleaseCode():
         try:
             sftp = self.connection.open_sftp()
             local_path = os.path.join(self.server_info['local_path'], self.server_info['release_version'])
+            number = 0
             for (dirname,subdir, subfile) in os.walk(local_path):
                 remote_path = os.path.join(self.server_info['remote_path'],self.server_info['release_version'], dirname[len(local_path)+1:])
                 for fname in subfile:
                     file_abs_path = (os.path.join(dirname, fname))
                     lmd5sum = md5Checksum(file_abs_path)
-                    print "local %s md5: %s" % (fname, lmd5sum)
-
+                    #print "local %s md5: %s" % (fname, lmd5sum)
                     rfile_abs_path = (os.path.join(remote_path, fname))
                     try:
                         if sftp.stat(rfile_abs_path):
@@ -201,13 +201,14 @@ class ReleaseCode():
                             m2 = hashlib.md5()
                             m2.update(remote_file_data)
                             rmd5sum = m2.hexdigest()
-                            print "remote %s file md5: %s" % (fname, rmd5sum)
-                            if lmd5sum == rmd5sum:
-                                print "md5sum check OK"
+                            #print "remote %s file md5: %s" % (fname, rmd5sum)
+                            if lmd5sum != rmd5sum:
+                                print "%s md5sum check failed." % fname
                             else:
-                                print "md5sum check Failed."
+                                number += 1
                     except Exception:
                         print "%s is not exsits." % fname
+            print "md5sum check OK number: %d" % number
             sftp.close()
 
         except Exception as e:
@@ -217,4 +218,4 @@ class ReleaseCode():
                 sftp.close()
             except:
                 pass
-            sys.exit(1)    
+            sys.exit(1)

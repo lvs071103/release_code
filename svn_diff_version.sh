@@ -1,7 +1,7 @@
 #!/bin/bash
 # Filename: svn_diff_version.sh
  
-SVN_PATH="./code/release/yunwei"
+SVN_PATH="./code/src/yunwei"
  
 last_version=$(tail -n 1 code/last_version)
  
