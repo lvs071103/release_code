@@ -19,20 +19,20 @@ platform_list = [
                                'username': 'root',
                                'password': '?root?',
                                'port': 22,
-                               'local_path': './code/export/',   # full update code store local path
+                               'local_path': './code/export/', 
                                'remote_path': '/data/deploy/',
                                'patch_path': './code/patch/',
                                'release_path': '/data/release/'}
         },
         {
             'server_id': 3,
-            'connect_params': {'hostname': '60.191.239.212',
-                               'username': 'root',
-                               'password': '?root?',
-                               'port': 22,
-                               'local_path': './code/export/',    # full update code store local path
-                               'remote_path': '/home/deploy/',    # remote server deploy path
-                               'patch_path': './code/patch/',     # patch store local path
-                               'release_path': '/home/release/'}  # remote server release path
+            'connect_params': {'hostname': '60.191.239.212',      # remote server's ip
+                               'username': 'root',                # remote user
+                               'password': '?root?',              # remote password
+                               'port': 22,                        # remote server ssh port
+                               'local_path': './code/export/',    # local code folder
+                               'remote_path': '/home/deploy/',    # remote deploy folder
+                               'patch_path': './code/patch/',     # local patch folder
+                               'release_path': '/home/release/'}  # remote release folder
         }
 ]
