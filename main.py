@@ -3,7 +3,7 @@
 # Filename: display_format.py
 
 from settings import *
-from resource_release import *
+from code_release import *
 from call_bash import *
 from display_format import *
 from get_patch_subdir import *
@@ -46,6 +46,9 @@ class main():
                     for item in range(len(platform_list)):
                         if platform_list[item]['server_id'] == choice:
                             server_connect_info = platform_list[item]['connect_params']
+                            ssh_handle = ReleaseCode(**server_connect_info)
+                            ssh_handle.check_sshconnect()
+                            ssh_handle.display_last_version()
                             release_version = raw_input("输入一个版本号，远程服务器将创建以这个版本号命名的目录: ")
                             server_connect_info['release_version'] = release_version
                             return server_connect_info
@@ -83,7 +86,6 @@ class main():
                     ssh_handle = ReleaseCode(**server_connect_info)
                     ssh_handle.check_sshconnect()
                     ssh_handle.full_upload()
-                    ssh_handle.check_md5()
                 except (KeyboardInterrupt, EOFError):
                     break
 
@@ -100,7 +102,6 @@ class main():
                         ssh_handle = ReleaseCode(**server_connect_info)
                         ssh_handle.check_sshconnect()
                         ssh_handle.increment_upload()
-                        ssh_handle.check_md5()
                 except(KeyboardInterrupt, EOFError):
                     break
 
@@ -108,7 +109,7 @@ class main():
                 try:
                     ssh_handle = ReleaseCode(**server_connect_info)
                     ssh_handle.check_sshconnect()
-                    ssh_handle.list_last_version()
+                    ssh_handle.display_last_version()
                     release_version = raw_input("输入要比对的目录，比如v1, 本地v1将拉取svn最新代码,与远程v1目录进行md5对比: ")
                     server_connect_info['release_version'] = release_version
                     ssh_handle = ReleaseCode(**server_connect_info)
@@ -124,7 +125,7 @@ class main():
                 try:
                     ssh_handle = ReleaseCode(**server_connect_info)
                     ssh_handle.check_sshconnect()
-                    ssh_handle.list_last_version()
+                    ssh_handle.display_last_version()
                     release_version = raw_input("输入上面显示版本号, 系统将远程部署目录/版本号和发布目录/stable建立软链接: ")
                     server_connect_info['release_version'] = release_version
                     ssh_handle = ReleaseCode(**server_connect_info)
@@ -137,7 +138,7 @@ class main():
                 try:
                     ssh_handle = ReleaseCode(**server_connect_info)
                     ssh_handle.check_sshconnect()
-                    ssh_handle.list_last_version()
+                    ssh_handle.display_last_version()
                     server_connect_info['last_version'] = raw_input("输入上面显示的任一版本, 进行回滚操作: ")
                     ssh_handle = ReleaseCode(**server_connect_info)
                     ssh_handle.check_sshconnect()

@@ -20,7 +20,7 @@ else
 	cd ${SVN_PATH}
 	svn up
 	echo "更新完毕"
-	new_version=$(svn up | awk '{print $3}' | awk -F. '{print $1}')
+	new_version=$(svn up | awk '{print $3}' | grep -v ^$ | awk -F. '{print $1}')
 	echo "上次版本：${last_version},当前版本:${new_version}"
  
 	if [ "${last_version}" -ne "${new_version}" ];then

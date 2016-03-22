@@ -28,7 +28,7 @@ platform_list = [
             'server_id': 3,
             'connect_params': {'hostname': '60.191.239.212',      # remote server's ip
                                'username': 'root',                # remote user
-                               'password': '?root?',              # remote password
+                               'password': 'S+VQILVLH0w/QLVQ1Wlv',              # remote password
                                'port': 22,                        # remote server ssh port
                                'local_path': './code/export/',    # local code folder
                                'remote_path': '/home/deploy/',    # remote deploy folder
