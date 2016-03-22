@@ -46,9 +46,9 @@ class main():
                     for item in range(len(platform_list)):
                         if platform_list[item]['server_id'] == choice:
                             server_connect_info = platform_list[item]['connect_params']
-                            ssh_handle = ReleaseCode(**server_connect_info)
-                            ssh_handle.check_sshconnect()
-                            ssh_handle.display_last_version()
+                            #ssh_handle = ReleaseCode(**server_connect_info)
+                            #ssh_handle.check_sshconnect()
+                            #ssh_handle.display_last_version()
                             release_version = raw_input("输入一个版本号，远程服务器将创建以这个版本号命名的目录: ")
                             server_connect_info['release_version'] = release_version
                             return server_connect_info
@@ -126,7 +126,7 @@ class main():
                     ssh_handle = ReleaseCode(**server_connect_info)
                     ssh_handle.check_sshconnect()
                     ssh_handle.display_last_version()
-                    release_version = raw_input("输入上面显示版本号, 系统将远程部署目录/版本号和发布目录/stable建立软链接: ")
+                    release_version = raw_input("输入上面显示版本号, 系统将远程部署目录/版本号与发布目录/stable建立软链接: ")
                     server_connect_info['release_version'] = release_version
                     ssh_handle = ReleaseCode(**server_connect_info)
                     ssh_handle.check_sshconnect()
