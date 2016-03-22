@@ -134,10 +134,10 @@ class ReleaseCode():
             sftp = self.connection.open_sftp()
             try:
                 dirlist = sftp.listdir(self.server_info['remote_path'])
+                for item in dirlist:
+                    print "Previous version: %s" % item
             except IOError:
-                print "%s folder is not exists."
-            for item in dirlist:
-                print "Previous version: %s" % item
+                print "%s folder is not exists. Please upload first" % self.server_info['remote_path']
 
         except Exception as e:
             print ('*** caught exception: %s: %s' % (e.__class__, e))
