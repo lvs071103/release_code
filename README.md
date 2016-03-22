@@ -7,3 +7,5 @@
 
 3、运行python main.py
 
+详情请访问：
+http://www.pythonic.in/27/
