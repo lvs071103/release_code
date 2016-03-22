@@ -3,7 +3,7 @@
 # Filename: display_format.py
 
 from settings import *
-from code_release import *
+from resource_release import *
 from call_bash import *
 from display_format import *
 from get_patch_subdir import *

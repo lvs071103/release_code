@@ -129,7 +129,7 @@ class ReleaseCode():
                 pass
             sys.exit(1)
 
-    def list_last_version(self):
+    def display_last_version(self):
         try:
             sftp = self.connection.open_sftp()
             try:
