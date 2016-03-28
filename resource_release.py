@@ -1,5 +1,5 @@
 #!/usr/bin/python
-# coding=utf8
+# coding: utf8
 # Filename: resource_release.py
 
 import sys
@@ -135,7 +135,7 @@ class ReleaseCode():
             try:
                 dirlist = sftp.listdir(self.server_info['remote_path'])
                 for item in dirlist:
-                    print "Previous version: %s" % item
+                    print "线上已有版本:", item
             except IOError:
                 print "%s folder is not exists. Please upload first" % self.server_info['remote_path']
 
@@ -193,14 +193,12 @@ class ReleaseCode():
                 for fname in subfile:
                     file_abs_path = (os.path.join(dirname, fname))
                     lmd5sum = md5Checksum(file_abs_path)
-                    #print "local %s md5: %s" % (fname, lmd5sum)
                     rfile_abs_path = (os.path.join(remote_path, fname))
                     try:
                         command = "md5sum %s | awk '{print $1}'" % rfile_abs_path
                         stdin, stdout, stderr = self.connection.exec_command(command)
                         for line in stdout.readlines():
                             rmd5sum = line.strip()
-                            #print "remote %s file md5: %s" % (fname, rmd5sum)
                         if lmd5sum != rmd5sum:
                             print "%s md5sum check failed." % fname
                         else:
