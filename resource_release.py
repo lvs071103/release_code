@@ -196,16 +196,15 @@ class ReleaseCode():
                     #print "local %s md5: %s" % (fname, lmd5sum)
                     rfile_abs_path = (os.path.join(remote_path, fname))
                     try:
-                        if sftp.stat(rfile_abs_path):
-                            remote_file_data = sftp.open(rfile_abs_path).read()
-                            m2 = hashlib.md5()
-                            m2.update(remote_file_data)
-                            rmd5sum = m2.hexdigest()
+                        command = "md5sum %s | awk '{print $1}'" % rfile_abs_path
+                        stdin, stdout, stderr = self.connection.exec_command(command)
+                        for line in stdout.readlines():
+                            rmd5sum = line.strip()
                             #print "remote %s file md5: %s" % (fname, rmd5sum)
-                            if lmd5sum != rmd5sum:
-                                print "%s md5sum check failed." % fname
-                            else:
-                                number += 1
+                        if lmd5sum != rmd5sum:
+                            print "%s md5sum check failed." % fname
+                        else:
+                            number += 1
                     except Exception:
                         print "%s is not exsits." % fname
             print "The number of md5sum check is OK: %d" % number
