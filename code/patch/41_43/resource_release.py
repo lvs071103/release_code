@@ -7,7 +7,7 @@ import paramiko
 import os
 import traceback
 import hashlib
-from colors import red, green, yellow
+from colors import red, green
 
 
 class ReleaseCode():
@@ -28,19 +28,18 @@ class ReleaseCode():
             quit()
         return True
 
-    def run_command(self, command):
-        stdin, stdout, stderr = self.connection.exec_command(command)
+    def run_command(self):
+        stdin, stdout, stderr = self.connection.exec_command(self.server_info['command'])
         for line in stdout.readlines():
             print green(line.strip())
         self.connection.close
 
-    def _uploads_with(self, top_path):
-        """sftp uploads"""
-        def internal_uploads(*args):
+    def _uploads_with(self, val):
+
+        def inner(val):
             try:
                 sftp = self.connection.open_sftp()
-                if sftp:
-                    print green("open_sftp successfully.")
+                top_path = os.path.join(self.server_info['patch_path'], val)
                 for dirpath, dirname, filenames in os.walk(top_path):
                     remote_path = os.path.join(self.server_info['remote_path'],
                                                self.server_info['release_version'],
@@ -52,22 +51,14 @@ class ReleaseCode():
                         try:
                             sftp.mkdir(dir_path)     # Create remote folder
                         except IOError:
-                            print yellow("assume %s create success or target folder exists.") % dir_path
+                            print red("assume %s create success or target folder exists.") % dir_path
                         try:
                             sftp.mkdir("%s/%s" % (dir_path, base_name))
                         except IOError:
-                            print yellow("assume %s/%s create sucess or folder already exists.") % \
-                                  (dir_path, base_name)
+                            print red("assume %s/%s create sucess or folder already exists.") % (dir_path, base_name)
                     for filename in filenames:
-                        if sftp.put(os.path.join(dirpath, filename), os.path.join(remote_path, filename)):
-                            print "Upload %s to %s %s " % \
-                                  (filename, self.server_info['hostname'],
-                                   remote_path), green("success")
-                        else:
-                            print "Upload %s to %s %s " % \
-                                  (filename, self.server_info['hostname'],
-                                   remote_path), red("failed")
-                sftp.close()
+                        sftp.put(os.path.join(dirpath, filename), os.path.join(remote_path, filename))
+                        print "Upload %s to %s %s success." % (filename, self.server_info['hostname'], remote_path)
 
             except Exception as e:
                 print('*** Caught exception: %s: %s' % (e.__class__, e))
@@ -77,83 +68,43 @@ class ReleaseCode():
                 except:
                     pass
                 sys.exit(1)
-            print green("%s update success" % top_path)
-        return internal_uploads(self)
+            return green("update success")
+        return inner
 
     def increment_upload(self, val):
-        top_path = os.path.join(self.server_info['patch_path'], val)
-        increment_upload = self._uploads_with(top_path)
-        result = increment_upload
-        return result
+        increment_upload = self._uploads_with(val)
+        return increment_upload
 
     def full_upload(self, val):
-        top_path = os.path.join(self.server_info['local_path'], val)
-        full_upload = self._uploads_with(top_path)
-        result = full_upload
-        return result
-
-    def islink(self, path):
-        try:
-            sftp = self.connection.open_sftp()
-            try:
-                return sftp.readlink(path)
-            except IOError:
-                return False
-            sftp.close()
-        except EOFError:
-            print red("open sftp failed.")
-
-    def unlink(self, link_target):
-        try:
-            sftp = self.connection.open_sftp()
-            try:
-                sftp.unlink(link_target)
-                print green("unlink success")
-            except IOError:
-                print red("assume path is a folder(directory).")
-
-        except EOFError:
-            print red("open sftp failed.")
-
-    def _symlink(self, link_target):
-        link_src = os.path.join(self.server_info['remote_path'], self.server_info['link_version'])
-
-        def internal_symlink(*args):
-            try:
-                sftp = self.connection.open_sftp()
-                if sftp:
-                    print green("open sftp success")
-                    try:
-                        sftp.listdir(self.server_info['release_path'])
-                    except IOError:
-                        sftp.mkdir(self.server_info['release_path'])
-                        print green("%s create success.") % self.server_info['release_path']
-
-                sftp.symlink(link_src, link_target)
-                print green("create symlink success.")
-
-                sftp.close()
-
-            except Exception as e:
-                print('*** Caught exception: %s: %s' % (e.__class__, e))
-                traceback.print_exc()
-                try:
-                    sftp.close()
-                except:
-                    pass
-                sys.exit(1)
-            print green("%s %s symlink success") % (link_src, link_target)
-
-        return internal_symlink(self)
+        full_upload = self._uploads_with(val)
+        return full_upload
 
     def release_symlink(self):
         release_version = "stable"
-        link_target = os.path.join(self.server_info['release_path'], release_version)
-        if self.islink(link_target):
-            self.unlink(link_target)
-            self._symlink(link_target)
-        else:
-            return self._symlink(link_target)
+        symlink = os.path.join(self.server_info['release_path'], release_version)
+        self.connection.exec_command("test -L %s && rm -rf %s" % (symlink, symlink))
+        try:
+            sftp = self.connection.open_sftp()
+            try:
+                sftp.listdir(self.server_info['release_path'])
+            except IOError:
+                sftp.mkdir(self.server_info['release_path'])
+                print "%s create success." % self.server_info['release_path']
+            link_target = os.path.join(self.server_info['release_path'], release_version)
+            link = os.path.join(self.server_info['remote_path'],
+                                self.server_info['release_version'])
+            sftp.symlink(link, link_target)
+            print "create symlink success."
+
+            sftp.close()
+        except Exception as e:
+            print('*** Caught exception: %s: %s' % (e.__class__, e))
+            traceback.print_exc()
+            try:
+                sftp.close()
+            except:
+                pass
+            sys.exit(1)
 
     def display_last_version(self):
         try:
@@ -161,9 +112,9 @@ class ReleaseCode():
             try:
                 dirlist = sftp.listdir(self.server_info['remote_path'])
                 for item in dirlist:
-                    print "远程服务器已部署版本: ", green(item)
+                    print green("线上已有版本: "), green(item)
             except IOError:
-                print yellow("assume %s folder is not exists. Please upload first") \
+                print "assume %s folder is not exists. Please upload first" \
                       % self.server_info['remote_path']
 
         except Exception as e:
@@ -175,14 +126,31 @@ class ReleaseCode():
                 pass
             sys.exit(1)
 
-    # def rollback(self):
-    #     release_version = "stable"
-    #     link_target = os.path.join(self.server_info['release_path'], release_version)
-    #     if self.islink(link_target):
-    #         self.unlink(link_target)
-    #         self._symlink(link_target)
-    #     else:
-    #         return self._symlink(link_target)
+    def rollback(self):
+        try:
+            sftp = self.connection.open_sftp()
+            release_version = "stable"
+            symlink = os.path.join(self.server_info['release_path'], release_version)
+            self.connection.exec_command("test -L %s && rm -rf %s" % (symlink, symlink))
+            print "delete old symlink success."
+            link = os.path.join(self.server_info['remote_path'],
+                                self.server_info['last_version'])
+            try:
+                sftp.listdir(self.server_info['release_path'])
+            except IOError:
+                sftp.mkdir(self.server_info['release_path'])
+                print "%s create success." % self.server_info['release_path']
+            sftp.symlink(link, symlink)
+            print "version rollback %s success." % (self.server_info['last_version'])
+
+        except Exception as e:
+            print ('*** caught exception: %s: %s' % (e.__class__, e))
+            traceback.print_exc()
+            try:
+                sftp.close()
+            except:
+                pass
+            sys.exit(1)
 
     def check_md5(self):
         def md5Checksum(filePath):
