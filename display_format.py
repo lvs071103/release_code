@@ -5,11 +5,12 @@
 
 class DisplayFormat(object):
     def __init__(self):
-        self.formatstring = '%-5s %-17s %-10s %-20s %-10s %-20s %-20s %-20s %-20s'
+        self.formatstring = '%-5s %-17s %-17s %-40s %-18s %-40s %-15s'
 
     def display_line(self):
-        print self.formatstring % ('-'*5, '-'*17, '-'*10, '-'*20, '-'*10, '-'*20, '-'*20, '-'*20, '-'*20)
+        print self.formatstring % ('-'*5, '-'*17, '-'*17, '-'*40, '-'*18, '-'*40, '-'*15)
 
     def head(self):
-        print self.formatstring % ('ID', 'REMOTE_SERVER_IP', 'USER', 'PASSWORD', 'SSH_PORT',
-                                   'LOCAL_CODE_FOLDER', 'REMOTE_DEPLOY_FOLDER', 'LOCAL_PATCH_FOLDER', 'REMOTE_RELEASE_FOLDER')
+        print self.formatstring % ('ID', 'REMOTE_SERVER_IP', 'LOCAL_CODE_FOLDER',
+                                   'REMOTE_DEPLOY_FOLDER', 'LOCAL_PATCH_FOLDER',
+                                   'REMOTE_RELEASE_FOLDER', 'RELEASE_VESION')
