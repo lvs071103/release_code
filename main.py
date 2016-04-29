@@ -12,6 +12,7 @@ import os
 import sys
 import shutil
 from check import check_isexists
+from __initialize_svn import initialize
 
 
 class Main:
@@ -207,6 +208,8 @@ class Main:
 
 if __name__ == '__main__':
     run = Main()
+    print u"初始化本地代码库"
+    initialize()
     run.displayserver()
     run.choiceserver()
     run.choicetype()

@@ -12,6 +12,6 @@ def bash_process(command):
     # for line in stdout.split('\n'):
     #    print line
     if process.returncode == 0:
-        print green("本地导出成功")
+        return True
     else:
-        print red("本地导出失败")
+        return False

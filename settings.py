@@ -1,7 +1,11 @@
 #!/usr/bin/python
 # Filename: settings.py
 
-svn_url = {'url': "https://", 'username': '', 'password': ''}
+svn_info = {'url': "https://192.168.2.214/leshu-svn/yunwei",
+           'username': 'jack',
+           'password': 'LVS@98186',
+           'co_folder': './code/src/yunwei'}
+
 git_url = {'url': 'https://', 'username': '', 'password': ''}
 
 
